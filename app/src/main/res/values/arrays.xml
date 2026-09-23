@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="map_type_entries">
+        <item>Rodoviário</item>
+        <item>Satélite</item>
+        <item>Terreno</item>
+        <item>Híbrido</item>
+    </string-array>
+
+    <string-array name="map_type_values">
+        <item>NORMAL</item>
+        <item>SATELLITE</item>
+        <item>TERRAIN</item>
+        <item>HYBRID</item>
+    </string-array>
+</resources>

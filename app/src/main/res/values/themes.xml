@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.TurismoOffline" parent="android:style/Theme.Material.Light.NoActionBar">
+        <item name="android:fontFamily">sans</item>
+        <item name="android:colorAccent">#4255A5</item>
+        <item name="android:navigationBarColor">#F8F9FF</item>
+        <item name="android:statusBarColor">#F8F9FF</item>
+        <item name="android:windowLightStatusBar">true</item>
+    </style>
+
+    <style name="Theme.TurismoOffline.Settings" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="colorPrimary">#4255A5</item>
+        <item name="colorPrimaryDark">#303F80</item>
+        <item name="colorAccent">#4255A5</item>
+        <item name="android:fontFamily">sans</item>
+        <item name="android:navigationBarColor">#F8F9FF</item>
+        <item name="android:statusBarColor">#F8F9FF</item>
+        <item name="android:windowLightStatusBar">true</item>
+    </style>
+</resources>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_title">Configurações do mapa</string>
+    <string name="map_settings_category">Mapa</string>
+    <string name="default_zoom_title">Zoom padrão</string>
+    <string name="default_zoom_summary">Defina o nível de zoom usado ao abrir o mapa.</string>
+    <string name="map_type_title">Tipo de mapa</string>
+</resources>
