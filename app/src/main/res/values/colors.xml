@@ -1,4 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="purple_700">#4255A5</color>
+    <color name="verde_mata">#0E6B5C</color>
+    <color name="mata_profunda">#094A40</color>
+    <color name="sol">#F5A524</color>
+    <color name="ceu">#7FC4E8</color>
+    <color name="areia">#FBF6EC</color>
+    <color name="carvao">#1C2B28</color>
+    <color name="ic_launcher_background">@color/verde_mata</color>
 </resources>

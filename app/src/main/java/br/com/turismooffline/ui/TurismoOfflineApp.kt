@@ -216,7 +216,7 @@ private fun AppTopBar(tab: AppTab) {
     TopAppBar(
         title = {
             Column {
-                Text("Turismo Offline", fontWeight = FontWeight.Bold)
+                Text("Marco", fontWeight = FontWeight.Bold)
                 if (tab == AppTab.LIST) Text("Seus pontos turísticos", style = MaterialTheme.typography.labelMedium)
             }
         }

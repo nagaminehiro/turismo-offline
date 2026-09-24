@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Sombra do relevo -->
+    <path
+        android:fillColor="#000000"
+        android:fillAlpha="0.14"
+        android:pathData="M0,88 Q54,72 108,88 V108 H0 Z" />
+
+    <!-- Marcador de mapa -->
+    <path
+        android:fillColor="@color/areia"
+        android:pathData="M54,84 C54,84 33,61 33,46 A21,21 0 0,1 75,46 C75,61 54,84 54,84 Z" />
+
+    <!-- Paisagem dentro do marcador -->
+    <group>
+        <clip-path android:pathData="M41,46 A13,13 0 1,0 67,46 A13,13 0 1,0 41,46 Z" />
+        <path
+            android:fillColor="@color/ceu"
+            android:pathData="M40,32 H68 V60 H40 Z" />
+        <path
+            android:fillColor="@color/sol"
+            android:pathData="M56,41 A4,4 0 1,0 64,41 A4,4 0 1,0 56,41 Z" />
+        <path
+            android:fillColor="@color/verde_mata"
+            android:pathData="M40,60 L49,45 L54,52 L59,46 L68,60 Z" />
+    </group>
+
+    <!-- Selo de adicionar -->
+    <path
+        android:fillColor="@color/sol"
+        android:strokeColor="@color/verde_mata"
+        android:strokeWidth="3"
+        android:pathData="M61,71 A10,10 0 1,0 81,71 A10,10 0 1,0 61,71 Z" />
+    <path
+        android:strokeColor="@color/carvao"
+        android:strokeWidth="3"
+        android:strokeLineCap="round"
+        android:pathData="M71,66 V76 M66,71 H76" />
+</vector>
