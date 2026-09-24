@@ -10,8 +10,6 @@ import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
 import android.net.Uri
-import android.os.Looper
-import android.provider.Settings
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -63,6 +61,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -398,65 +397,76 @@ private fun SpotFormScreen(
         context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
     }
 
-    fun applyLocation(location: Location) {
-        latitude = String.format(Locale.US, "%.7f", location.latitude)
-        longitude = String.format(Locale.US, "%.7f", location.longitude)
-        viewModel.reverseGeocode(location.latitude, location.longitude, context) { result ->
-            address = result ?: "Endereço não encontrado"
-        }
-    }
+    fun hasLocationPermission() = ContextCompat.checkSelfPermission(
+        context,
+        Manifest.permission.ACCESS_FINE_LOCATION
+    ) == PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(
+        context,
+        Manifest.permission.ACCESS_COARSE_LOCATION
+    ) == PackageManager.PERMISSION_GRANTED
 
-    fun readLocation() {
-        val hasFineLocation = ContextCompat.checkSelfPermission(
-            context,
-            Manifest.permission.ACCESS_FINE_LOCATION
-        ) == PackageManager.PERMISSION_GRANTED
-        val hasCoarseLocation = ContextCompat.checkSelfPermission(
-            context,
-            Manifest.permission.ACCESS_COARSE_LOCATION
-        ) == PackageManager.PERMISSION_GRANTED
-        if (!hasFineLocation && !hasCoarseLocation) return
-
-        try {
-            val provider = when {
-                locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) -> LocationManager.GPS_PROVIDER
-                locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER) -> LocationManager.NETWORK_PROVIDER
-                else -> null
-            }
-            if (provider == null) {
-                error = "Ative a localização do celular para obter as coordenadas."
-                context.startActivity(
-                    Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS).apply {
-                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    }
-                )
-                return
-            }
-
-            locationManager.getLastKnownLocation(provider)?.let {
-                applyLocation(it)
-                return
-            }
-
-            locationManager.requestSingleUpdate(
-                provider,
-                object : LocationListener {
-                    override fun onLocationChanged(location: Location) {
-                        applyLocation(location)
-                    }
-                },
-                Looper.getMainLooper()
-            )
-        } catch (_: SecurityException) {
-            error = "Não foi possível acessar a localização."
-        }
-    }
+    val shouldTrackLocation = initialSpot == null
+    var locationPermissionGranted by remember { mutableStateOf(hasLocationPermission()) }
+    var coordinatesEditedByUser by remember(initialSpot?.id) { mutableStateOf(false) }
+    var addressRequested by remember(initialSpot?.id) { mutableStateOf(false) }
 
     val locationPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
-        if (permissions.values.any { it }) readLocation()
-        else error = "Permissão de localização recusada."
+        locationPermissionGranted = permissions.values.any { it }
+        if (!locationPermissionGranted) error = "Permissão de localização recusada."
+    }
+
+    LaunchedEffect(Unit) {
+        if (shouldTrackLocation && !locationPermissionGranted) {
+            locationPermissionLauncher.launch(
+                arrayOf(
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                )
+            )
+        }
+    }
+
+    DisposableEffect(locationManager, locationPermissionGranted) {
+        val locationListener = object : LocationListener {
+            override fun onLocationChanged(location: Location) {
+                if (coordinatesEditedByUser) return
+                latitude = String.format(Locale.US, "%.7f", location.latitude)
+                longitude = String.format(Locale.US, "%.7f", location.longitude)
+                if (!addressRequested) {
+                    addressRequested = true
+                    viewModel.reverseGeocode(location.latitude, location.longitude, context) { result ->
+                        address = result ?: "Endereço não encontrado"
+                    }
+                }
+            }
+        }
+
+        if (shouldTrackLocation && locationPermissionGranted) {
+            val providers = listOf(LocationManager.GPS_PROVIDER, LocationManager.NETWORK_PROVIDER)
+                .filter { locationManager.isProviderEnabled(it) }
+            if (providers.isEmpty()) error = "Ative a localização do celular para obter as coordenadas."
+            try {
+                providers.mapNotNull { locationManager.getLastKnownLocation(it) }
+                    .maxByOrNull { it.time }
+                    ?.let { locationListener.onLocationChanged(it) }
+                providers.forEach { provider ->
+                    locationManager.requestLocationUpdates(
+                        provider,
+                        0,
+                        0f,
+                        locationListener
+                    )
+                }
+            } catch (_: SecurityException) {
+                error = "Não foi possível acessar a localização."
+            }
+        }
+
+        onDispose {
+            locationManager.removeUpdates(locationListener)
+        }
     }
 
     val cameraLauncher = rememberLauncherForActivityResult(
@@ -505,50 +515,28 @@ private fun SpotFormScreen(
             OutlinedTextField(name, { name = it }, Modifier.fillMaxWidth(), label = { Text("Nome do ponto turístico") }, singleLine = true)
             OutlinedTextField(description, { description = it }, Modifier.fillMaxWidth().height(120.dp), label = { Text("Descrição") }, minLines = 3)
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                OutlinedTextField(latitude, { latitude = it }, Modifier.weight(1f), label = { Text("Latitude") }, singleLine = true)
-                OutlinedTextField(longitude, { longitude = it }, Modifier.weight(1f), label = { Text("Longitude") }, singleLine = true)
+                OutlinedTextField(latitude, { latitude = it; coordinatesEditedByUser = true }, Modifier.weight(1f), label = { Text("Latitude") }, singleLine = true)
+                OutlinedTextField(longitude, { longitude = it; coordinatesEditedByUser = true }, Modifier.weight(1f), label = { Text("Longitude") }, singleLine = true)
             }
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            OutlinedButton(
+                onClick = {
+                    val lat = latitude.toDoubleOrNull()
+                    val lon = longitude.toDoubleOrNull()
+                    if (lat == null || lon == null || lat !in -90.0..90.0 || lon !in -180.0..180.0) {
+                        error = "Informe latitude (-90 a 90) e longitude (-180 a 180) válidas."
+                    } else {
+                        viewModel.reverseGeocode(lat, lon, context) { result ->
+                            address = result ?: "Endereço não encontrado"
+                        }
+                    }
+                },
+                enabled = !isGeocoding,
+                modifier = Modifier.fillMaxWidth()
             ) {
-                OutlinedButton(
-                    onClick = {
-                        val permissions = arrayOf(
-                            Manifest.permission.ACCESS_FINE_LOCATION,
-                            Manifest.permission.ACCESS_COARSE_LOCATION
-                        )
-                        val granted = permissions.any {
-                            ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED
-                        }
-                        if (granted) readLocation() else locationPermissionLauncher.launch(permissions)
-                    },
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Icon(Icons.Default.LocationOn, contentDescription = null)
-                    Spacer(Modifier.width(4.dp))
-                    Text("Usar GPS")
-                }
-                OutlinedButton(
-                    onClick = {
-                        val lat = latitude.toDoubleOrNull()
-                        val lon = longitude.toDoubleOrNull()
-                        if (lat == null || lon == null || lat !in -90.0..90.0 || lon !in -180.0..180.0) {
-                            error = "Informe latitude (-90 a 90) e longitude (-180 a 180) válidas."
-                        } else {
-                            viewModel.reverseGeocode(lat, lon, context) { result ->
-                                address = result ?: "Endereço não encontrado"
-                            }
-                        }
-                    },
-                    enabled = !isGeocoding,
-                    modifier = Modifier.weight(1f)
-                ) {
-                    if (isGeocoding) CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
-                    else Icon(Icons.Default.Place, contentDescription = null)
-                    Spacer(Modifier.width(4.dp))
-                    Text("Buscar endereço")
-                }
+                if (isGeocoding) CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
+                else Icon(Icons.Default.Place, contentDescription = null)
+                Spacer(Modifier.width(4.dp))
+                Text("Buscar endereço")
             }
             if (address.isNotBlank()) Text("Endereço: $address", style = MaterialTheme.typography.bodyMedium)
             Row(
