@@ -2,19 +2,25 @@
 <resources>
     <style name="Theme.TurismoOffline" parent="android:style/Theme.Material.Light.NoActionBar">
         <item name="android:fontFamily">sans</item>
-        <item name="android:colorAccent">#4255A5</item>
-        <item name="android:navigationBarColor">#F8F9FF</item>
-        <item name="android:statusBarColor">#F8F9FF</item>
+        <item name="android:colorPrimary">@color/verde_mata</item>
+        <item name="android:colorPrimaryDark">@color/mata_profunda</item>
+        <item name="android:colorAccent">@color/verde_mata</item>
+        <item name="android:windowBackground">@color/areia</item>
+        <item name="android:navigationBarColor">@color/areia</item>
+        <item name="android:statusBarColor">@color/areia</item>
         <item name="android:windowLightStatusBar">true</item>
     </style>
 
     <style name="Theme.TurismoOffline.Settings" parent="Theme.AppCompat.Light.NoActionBar">
-        <item name="colorPrimary">#4255A5</item>
-        <item name="colorPrimaryDark">#303F80</item>
-        <item name="colorAccent">#4255A5</item>
-        <item name="android:fontFamily">sans</item>
-        <item name="android:navigationBarColor">#F8F9FF</item>
-        <item name="android:statusBarColor">#F8F9FF</item>
+        <item name="colorPrimary">@color/verde_mata</item>
+        <item name="colorPrimaryDark">@color/mata_profunda</item>
+        <item name="colorAccent">@color/verde_mata</item>
+        <item name="android:fontFamily">@font/dm_sans_regular</item>
+        <item name="fontFamily">@font/dm_sans_regular</item>
+        <item name="android:windowBackground">@color/areia</item>
+        <item name="android:textColorPrimary">@color/carvao</item>
+        <item name="android:navigationBarColor">@color/areia</item>
+        <item name="android:statusBarColor">@color/areia</item>
         <item name="android:windowLightStatusBar">true</item>
     </style>
 </resources>

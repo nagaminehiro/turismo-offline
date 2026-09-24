@@ -1,4 +1,4 @@
-# Turismo Offline
+# Marco (Turismo Offline)
 
 Aplicativo Android para cadastro local de pontos turísticos, desenvolvido com Kotlin, Jetpack Compose e arquitetura MVVM.
 

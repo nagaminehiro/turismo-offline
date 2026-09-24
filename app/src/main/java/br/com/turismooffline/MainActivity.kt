@@ -12,6 +12,7 @@ import br.com.turismooffline.BuildConfig
 import br.com.turismooffline.ui.TouristSpotViewModel
 import br.com.turismooffline.ui.TouristSpotViewModelFactory
 import br.com.turismooffline.ui.TurismoOfflineApp
+import br.com.turismooffline.ui.theme.TurismoOfflineTheme
 
 class MainActivity : ComponentActivity() {
     private val viewModel: TouristSpotViewModel by viewModels {
@@ -25,6 +26,8 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        setContent { TurismoOfflineApp(viewModel) }
+        setContent {
+            TurismoOfflineTheme { TurismoOfflineApp(viewModel) }
+        }
     }
 }
